@@ -24,9 +24,18 @@ public:
         MyTestFile.close();
         return end - begin;
     }
+
+    int getLineCount() {
+        std::ifstream MyTestFile(filename);
+        std::string line;
+        int count = 0;
+        while (getline(MyTestFile, line)) count++;
+        MyTestFile.close();
+        return count;
+    }
 };  
 
 int main() {
     WC myWCProgram("test.txt");  
-    std::cout << myWCProgram.getByteCount() << std::endl;
+    std::cout << myWCProgram.getLineCount() << std::endl;
 }
