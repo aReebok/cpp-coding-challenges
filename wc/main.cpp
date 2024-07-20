@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 class WC {
 private:
@@ -18,10 +19,11 @@ public:
     int getByteCount(){
         std::ifstream MyTestFile(filename, std::ios::binary);
         std::streampos begin, end;
-        begin = MyTestFile.tellg();
-        MyTestFile.seekg(0, std::ios::end);
-        end = MyTestFile.tellg();
+        begin = MyTestFile.tellg();             // gets current position; returns a streampos
+        MyTestFile.seekg(0, std::ios::end);     // change current position to ios::end 
+        end = MyTestFile.tellg();               // get current position (now at the end)
         MyTestFile.close();
+
         return end - begin;
     }
 
@@ -31,11 +33,47 @@ public:
         int count = 0;
         while (getline(MyTestFile, line)) count++;
         MyTestFile.close();
+
         return count;
     }
-};  
 
-int main() {
-    WC myWCProgram("test.txt");  
-    std::cout << myWCProgram.getLineCount() << std::endl;
+    int getWordCount() {
+        std::ifstream MyTestFile(filename);
+        int wordCount = 0;
+        std::string line, word;
+        while(getline(MyTestFile, line)) {
+            std::stringstream stream(line);
+            while(stream >> word) wordCount++;   
+        }
+        MyTestFile.close();
+
+        return wordCount;
+    }
+
+    int getCharCount() {
+        std::ifstream MyTestFile(filename);
+        int count = 0;
+        char c;
+        while (MyTestFile.get(c)) {
+            if (c >= 32 && c <= 126) count++;
+        }
+        MyTestFile.close();
+        return count;
+    }
+
+};
+
+// enum Commands {
+//     l = "-l", w, c, m
+// };
+
+int main(int argc, char* argv[]) {
+    if (argc >= 1) {
+        WC myWCProgram("test.txt");  
+        std::cout << myWCProgram.getCharCount() << std::endl;
+
+    } else {
+        std::cout << "please enter arguments"<< std::endl;
+    }
+    return 0;
 }
