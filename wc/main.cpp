@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <locale>
 
 class WC {
 private:
@@ -51,29 +52,53 @@ public:
     }
 
     int getCharCount() {
-        std::ifstream MyTestFile(filename);
-        int count = 0;
-        char c;
-        while (MyTestFile.get(c)) {
-            if (c >= 32 && c <= 126) count++;
-        }
-        MyTestFile.close();
-        return count;
-    }
+        std::wifstream file(filename);
+        
+        // Set the locale to handle UTF-8
+        file.imbue(std::locale(""));
 
+        int characters = 0;
+        wchar_t ch;
+        while (file.get(ch)) {
+            characters++;
+        }
+        return characters;
+    }
 };
 
-// enum Commands {
-//     l = "-l", w, c, m
-// };
-
 int main(int argc, char* argv[]) {
-    if (argc >= 1) {
-        WC myWCProgram("test.txt");  
-        std::cout << myWCProgram.getCharCount() << std::endl;
-
-    } else {
-        std::cout << "please enter arguments"<< std::endl;
+    if (argc < 2) {
+        std::cerr << "Usage: ccwc -[c|l|w|m] file_path" << std::endl;
+        std::cerr << "Options:" << std::endl;
+        std::cerr << "  -c\tcount bytes" << std::endl;
+        std::cerr << "  -l\tcount lines" << std::endl;
+        std::cerr << "  -w\tcount words" << std::endl;
+        std::cerr << "  -m\tcount characters" << std::endl;
+        return 1;
     }
-    return 0;
+
+    std::string filePath = argv[1];
+    std::string option = "-a";
+    if (argc >= 3) {
+        option = argv[1];
+        filePath = argv[2];
+    }
+
+    WC f(filePath);
+
+    int count = 0;
+    if (option == "-c") {
+        count = f.getByteCount();
+    } else if (option == "-l") {
+        count = f.getLineCount();
+    } else if (option == "-w") {
+        count = f.getWordCount();
+    } else if (option == "-m") {
+        count = f.getCharCount();
+    } else {
+        std::cout<< "\t" << f.getLineCount() << "\t" << f.getWordCount() << "\t"
+        << f.getByteCount() << "\t" << filePath << std::endl;
+        return 0;
+    }
+    std::cout << "\t" << count << "\t" << filePath << std::endl;
 }
